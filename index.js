@@ -19,7 +19,7 @@ setPageJS(/* js */ `
     const originalDocumentAddEventListener = Document.prototype.addEventListener;
 
     // set to true to spam the console
-    const DEBUG = true;
+    const DEBUG = false;
 
     /**
      * Debug logging function.
