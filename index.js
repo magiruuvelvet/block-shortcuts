@@ -37,6 +37,19 @@ setPageJS(/* js */ `
       return event.ctrlKey || event.shiftKey || event.altKey || event.metaKey;
     }
 
+    /**
+     * @return {Boolean} true if the event is a key event
+     */
+    function isKeyEvent(event) {
+      return event.type === "keyup" || event.type === "keydown";
+    }
+
+    /**
+     * Converts the given event to a human-readable keyboard shortcut string.
+     *
+     * @param {Event} event the event object
+     * @return {String} a human-readable keyboard shortcut string
+     */
     function modifierToString(event) {
       let str = "";
 
@@ -66,11 +79,12 @@ setPageJS(/* js */ `
      */
     function shouldBlockEvent(event) {
       // check if the event type is "keyup" or "keydown" with a modifier key
-      if (hasModifierKey(event) && (event.type === "keyup" || event.type === "keydown")) {
+      if (hasModifierKey(event) && isKeyEvent(event)) {
         // prevent the listener from being added
         console.log("[Block Shortcuts] blocked '" + modifierToString(event) + "' event listener");
         return true;
       }
+
       return false;
     }
 
