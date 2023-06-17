@@ -17,3 +17,9 @@ Built-in browser shortcuts (like `Ctrl+A` to highlight all text) are NOT affecte
 still function as intended. Event listeners added to input fields are not affected as they don't directly relate
 to `Window` or `Document`. The input field must have focus anyway for the key event to work. This extension only
 focuses on global shortcuts for now to prevent running code when no element seems to have focus.
+
+## Tweak Branch: GitHub
+
+Blocks all of GitHub's keyboard shortcuts which are hardcoded and can't be disabled.
+Prevent the accidental triggering of unwanted actions because GitHub decided to handle key events
+in the most stupid way possible.
