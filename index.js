@@ -99,6 +99,13 @@ setPageJS(/* js */ `
         return true;
       }
 
+      // block all of GitHub's forced keyboard events (which can't be disabled btw)
+      if (location.host === "github.com" && isKeyEvent(event)) {
+        // prevent accidental triggering of unwanted actions due to how GitHub implemented them
+        debug("[Block Shortcuts] blocked GitHub's forced keyboard event");
+        return true;
+      }
+
       return false;
     }
 
