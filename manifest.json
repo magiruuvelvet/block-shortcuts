@@ -2,8 +2,8 @@
   "manifest_version": 2,
   "name": "Block Shortcuts",
   "description": "Disallow to register keyboard shortcuts",
-  "version": "0.1",       
-  "permissions":[
+  "version": "0.1",
+  "permissions": [
     "tabs"
   ],
   "content_scripts": [

@@ -1,0 +1,36 @@
+<!--***********************************-->
+<!-- MUST BE SERVED VIA HTTPS TO WORK! -->
+<!--***********************************-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+/**
+ * TEST SNIPPETS
+ */
+
+// should work
+document.addEventListener("click", (e)=>{ console.log("click", e); });
+
+// should be blocked when using modifier keys
+document.addEventListener("keyup", (e)=>{
+  if (e.ctrlKey || e.shiftKey || e.altKey || e.metaKey) {
+    console.error("unreachable, if you can read this something went wrong", e);
+  } else {
+    console.log("keyup", e);
+  }
+});
+document.addEventListener("keydown", (e)=>{
+  if (e.ctrlKey || e.shiftKey || e.altKey || e.metaKey) {
+    console.error("unreachable, if you can read this something went wrong", e);
+  } else {
+    console.log("keydown", e);
+  }
+});
+
+    </script>
+  </head>
+  <body>
+  </body>
+</html>

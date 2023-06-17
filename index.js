@@ -18,6 +18,18 @@ setPageJS(/* js */ `
     const originalWindowAddEventListener = Window.prototype.addEventListener;
     const originalDocumentAddEventListener = Document.prototype.addEventListener;
 
+    // set to true to spam the console
+    const DEBUG = true;
+
+    /**
+     * Debug logging function.
+     */
+    function debug(...args) {
+      if (DEBUG) {
+        console.log(...args);
+      }
+    }
+
     /**
      * Function to determine whether the event should be blocked early.
      *
@@ -31,6 +43,7 @@ setPageJS(/* js */ `
     }
 
     /**
+     * @param {Event} event the event object
      * @return {Boolean} true if the event has a modifier key
      */
     function hasModifierKey(event) {
@@ -38,6 +51,7 @@ setPageJS(/* js */ `
     }
 
     /**
+     * @param {Event} event the event object
      * @return {Boolean} true if the event is a key event
      */
     function isKeyEvent(event) {
@@ -81,7 +95,7 @@ setPageJS(/* js */ `
       // check if the event type is "keyup" or "keydown" with a modifier key
       if (hasModifierKey(event) && isKeyEvent(event)) {
         // prevent the listener from being added
-        console.log("[Block Shortcuts] blocked '" + modifierToString(event) + "' event listener");
+        debug("[Block Shortcuts] blocked '" + modifierToString(event) + "' event listener");
         return true;
       }
 
@@ -99,6 +113,8 @@ setPageJS(/* js */ `
      */
     function addEventListenerInterceptor(original) {
       return function(type, listener, options) {
+        debug("[Block Shortcuts] intercepted '" + type + "' event listener");
+
         // determine if the event should be blocked early
         if (shouldBlockEventEarly(type)) {
           return;
@@ -109,6 +125,8 @@ setPageJS(/* js */ `
 
         // intercept the listener callback function to gain access to the event object
         listener = function(event) {
+          debug("[Block Shortcuts] intercepted '" + event.type + "' event listener callback function");
+
           // determine if the event should be blocked
           if (shouldBlockEvent(event)) {
             return;
@@ -128,34 +146,8 @@ setPageJS(/* js */ `
     }
 
     // override the addEventListener functions
-    console.log("[Block Shortcuts] registering event listener interceptors...");
+    debug("[Block Shortcuts] registering event listener interceptors...");
     Window.prototype.addEventListener = addEventListenerInterceptor(originalWindowAddEventListener);
     Document.prototype.addEventListener = addEventListenerInterceptor(originalDocumentAddEventListener);
   })();
 `);
-
-/**
- * TEST SNIPPETS
- */
-/*
-
-// should work
-document.addEventListener("click", (e)=>{ console.log("click", e); });
-
-// should be blocked when using modifier keys
-document.addEventListener("keyup", (e)=>{
-  if (e.ctrlKey || e.shiftKey || e.altKey || e.metaKey) {
-    console.error("unreachable", e);
-  } else {
-    console.log("keyup", e);
-  }
-});
-document.addEventListener("keydown", (e)=>{
-  if (e.ctrlKey || e.shiftKey || e.altKey || e.metaKey) {
-    console.error("unreachable", e);
-  } else {
-    console.log("keydown", e);
-  }
-});
-
-*/
