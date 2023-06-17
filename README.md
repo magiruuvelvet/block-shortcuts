@@ -14,4 +14,6 @@ Every time a key event happens in your browser window, the interceptor checks if
 modifier key enabled (Ctrl, Shift, Alt, Meta) and blocks the execution of the original listener callback function.
 
 Built-in browser shortcuts (like `Ctrl+A` to highlight all text) are NOT affected by this interceptor and should
-still function as intended.
+still function as intended. Event listeners added to input fields are not affected as they don't directly relate
+to `Window` or `Document`. The input field must have focus anyway for the key event to work. This extension only
+focuses on global shortcuts for now to prevent running code when no element seems to have focus.
