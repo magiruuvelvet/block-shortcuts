@@ -11,21 +11,64 @@ function setPageJS(content){
 // metaKey    -- The "Meta" key was also pressed.
 
 // disable keyboard shortcut registration
-setPageJS(`
+setPageJS(/* js */ `
   // execute in anonymous function context to avoid conflicts with other scripts
   (() => {
-    let blockCounter = 0;
-
-    // save a reference to the original addEventListener function
+    // save a reference to the original addEventListener functions
     const originalWindowAddEventListener = Window.prototype.addEventListener;
     const originalDocumentAddEventListener = Document.prototype.addEventListener;
 
-    function shouldBlockEvent(type) {
-      // check if the event type is "keyup" or "keydown"
-      if (type === "keyup" || type === "keydown") {
+    /**
+     * Function to determine whether the event should be blocked early.
+     *
+     * This check is executed before the underlying addEventListener function.
+     *
+     * @param {String} type the event type
+     * @return {Boolean} true if the event should be blocked
+     */
+    function shouldBlockEventEarly(type) {
+      return false;
+    }
+
+    /**
+     * @return {Boolean} true if the event has a modifier key
+     */
+    function hasModifierKey(event) {
+      return event.ctrlKey || event.shiftKey || event.altKey || event.metaKey;
+    }
+
+    function modifierToString(event) {
+      let str = "";
+
+      if (event.ctrlKey) {
+        str += "Ctrl+";
+      }
+      if (event.shiftKey) {
+        str += "Shift+";
+      }
+      if (event.altKey) {
+        str += "Alt+";
+      }
+      if (event.metaKey) {
+        str += "Meta+";
+      }
+
+      return str + event.key.toUpperCase();
+    }
+
+    /**
+     * Function to determine whether the event should be blocked.
+     *
+     * This check is executed as part of the listener callback function.
+     *
+     * @param {Event} event the event object
+     * @return {Boolean} true if the event should be blocked
+     */
+    function shouldBlockEvent(event) {
+      // check if the event type is "keyup" or "keydown" with a modifier key
+      if (hasModifierKey(event) && (event.type === "keyup" || event.type === "keydown")) {
         // prevent the listener from being added
-        blockCounter++;
-        console.log(\`[Block Shortcuts] blocked '\${type}' event listener (\${blockCounter} blocked event listeners total)\`);
+        console.log("[Block Shortcuts] blocked '" + modifierToString(event) + "' event listener");
         return true;
       }
       return false;
@@ -42,17 +85,35 @@ setPageJS(`
      */
     function addEventListenerInterceptor(original) {
       return function(type, listener, options) {
-        // determine if the event should be blocked
-        if (shouldBlockEvent(type)) {
+        // determine if the event should be blocked early
+        if (shouldBlockEventEarly(type)) {
           return;
         }
+
+        // save a reference to the original listener callback function
+        const originalListenerCallback = listener;
+
+        // intercept the listener callback function to gain access to the event object
+        listener = function(event) {
+          // determine if the event should be blocked
+          if (shouldBlockEvent(event)) {
+            return;
+          }
+
+          // call the original listener callback function
+          if (typeof originalListenerCallback === "function") {
+            return originalListenerCallback.call(this, event);
+          } else {
+            return;
+          }
+        };
 
         // call the original addEventListener function for other event types
         return original.call(this, type, listener, options);
       };
     }
 
-    // override the addEventListener function
+    // override the addEventListener functions
     console.log("[Block Shortcuts] registering event listener interceptors...");
     Window.prototype.addEventListener = addEventListenerInterceptor(originalWindowAddEventListener);
     Document.prototype.addEventListener = addEventListenerInterceptor(originalDocumentAddEventListener);
@@ -65,10 +126,22 @@ setPageJS(`
 /*
 
 // should work
-document.addEventListener("click", ()=>{ console.log("clicked"); });
+document.addEventListener("click", (e)=>{ console.log("click", e); });
 
-// should be blocked
-document.addEventListener("keyup", ()=>{ console.error("unreachable"); });
-document.addEventListener("keydown", ()=>{ console.error("unreachable"); });
+// should be blocked when using modifier keys
+document.addEventListener("keyup", (e)=>{
+  if (e.ctrlKey || e.shiftKey || e.altKey || e.metaKey) {
+    console.error("unreachable", e);
+  } else {
+    console.log("keyup", e);
+  }
+});
+document.addEventListener("keydown", (e)=>{
+  if (e.ctrlKey || e.shiftKey || e.altKey || e.metaKey) {
+    console.error("unreachable", e);
+  } else {
+    console.log("keydown", e);
+  }
+});
 
 */
