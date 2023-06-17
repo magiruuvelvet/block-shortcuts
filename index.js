@@ -145,6 +145,16 @@ setPageJS(/* js */ `
       };
     }
 
+    const WHITELIST = [
+      "twitter.com",
+      "youtube.com", "www.youtube.com",
+    ];
+
+    // don't install interceptor if the host is in the whitelist
+    if (WHITELIST.includes(location.host)) {
+      return;
+    }
+
     // override the addEventListener functions
     debug("[Block Shortcuts] registering event listener interceptors...");
     Window.prototype.addEventListener = addEventListenerInterceptor(originalWindowAddEventListener);
